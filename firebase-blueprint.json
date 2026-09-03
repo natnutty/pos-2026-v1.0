@@ -1,0 +1,120 @@
+{
+  "entities": {
+    "menuItems": {
+      "title": "Menu Item",
+      "description": "Catalog item sold in POS",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "minStockThreshold": { "type": "number" },
+        "unit": { "type": "string" },
+        "isAvailable": { "type": "boolean" },
+        "description": { "type": "string" },
+        "descriptionEn": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "price", "costPrice", "stock", "unit", "isAvailable"]
+    },
+    "transactions": {
+      "title": "Transaction",
+      "description": "Completed or cancelled POS sale receipt",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "receiptNumber": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "costAmount": { "type": "number" },
+        "profit": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "cashReceived": { "type": "number" },
+        "cashChange": { "type": "number" },
+        "customerName": { "type": "string" },
+        "tableNumber": { "type": "string" },
+        "orderType": { "type": "string" },
+        "status": { "type": "string" },
+        "cashierName": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "receiptNumber", "date", "timestamp", "items", "totalAmount", "status"]
+    },
+    "stockLogs": {
+      "title": "Stock Log",
+      "description": "Audit log for inventory movements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "changeAmount": { "type": "number" },
+        "previousStock": { "type": "number" },
+        "newStock": { "type": "number" },
+        "reason": { "type": "string" },
+        "referenceId": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "date": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "itemId", "itemName", "changeAmount", "previousStock", "newStock", "reason", "timestamp"]
+    },
+    "storeProfile": {
+      "title": "Store Profile",
+      "description": "Store contact and thermal print settings",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "tagline": { "type": "string" },
+        "address": { "type": "string" },
+        "phone": { "type": "string" },
+        "footerMessage": { "type": "string" },
+        "cashierName": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "users": {
+      "title": "User Account",
+      "description": "POS accounts for cashier and owner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" }
+      },
+      "required": ["id", "username", "password", "name", "role"]
+    }
+  },
+  "firestore": {
+    "/menuItems/{itemId}": {
+      "schema": "menuItems",
+      "description": "Menu items collection"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "transactions",
+      "description": "Transactions history collection"
+    },
+    "/stockLogs/{logId}": {
+      "schema": "stockLogs",
+      "description": "Stock change logs"
+    },
+    "/settings/storeProfile": {
+      "schema": "storeProfile",
+      "description": "Store settings document"
+    },
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User accounts"
+    }
+  }
+}
