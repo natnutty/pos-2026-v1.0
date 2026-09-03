@@ -5,20 +5,17 @@ import {
   Receipt, 
   BarChart3, 
   Settings, 
-  Wifi, 
   WifiOff, 
   Volume2, 
   VolumeX, 
   Store, 
-  Languages,
-  LogOut,
-  ShieldCheck,
+  LogOut, 
+  ShieldCheck, 
   UserCheck,
   Cloud
 } from 'lucide-react';
 import { StoreProfile, UserAccount } from '../types';
 import { sounds } from '../utils/sound';
-import { formatRupiah } from '../utils/formatters';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export interface HeaderProps {
@@ -37,7 +34,6 @@ export const Header = ({
   setActiveTab,
   openSettings,
   storeProfile,
-  todayRevenue,
   todayTxCount,
   currentUser,
   onLogout,
@@ -45,54 +41,24 @@ export const Header = ({
   const { language, setLanguage, t } = useLanguage();
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [soundActive, setSoundActive] = useState<boolean>(true);
-  const [currentTime, setCurrentTime] = useState<string>('');
-  const [currentDate, setCurrentDate] = useState<string>('');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
-    const updateClock = () => {
-      const now = new Date();
-      const locale = language === 'en' ? 'en-US' : 'id-ID';
-      setCurrentTime(
-        new Intl.DateTimeFormat(locale, {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false,
-        }).format(now)
-      );
-      setCurrentDate(
-        new Intl.DateTimeFormat(locale, {
-          weekday: 'short',
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        }).format(now)
-      );
-    };
-
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      clearInterval(interval);
     };
-  }, [language]);
-
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
+  }, []);
 
   const toggleSound = () => {
     const nextState = !soundActive;
     setSoundActive(nextState);
-    sounds.enabled = nextState;
-    if (nextState) sounds.playBeep();
+    sounds.playBeep();
   };
 
   const toggleLanguage = () => {
@@ -120,36 +86,25 @@ export const Header = ({
   ];
 
   const navItems = allNavItems.filter((item) => item.roles.includes(currentUser.role));
-
   const isOwner = currentUser.role === 'owner';
 
   return (
-    <header className="bg-[#0B1528] text-slate-100 border-b border-blue-950/80 sticky top-0 z-30 shadow-lg shadow-slate-950/40">
-      <div className="max-w-7xl mx-auto px-3 sm:px-5">
-        <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+    <header className="bg-[#0B1528] text-slate-100 border-b border-slate-800 sticky top-0 z-30 shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14 gap-3">
           
-          {/* Logo & Brand */}
+          {/* 1. Left: Simple Store Identity */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold border border-blue-400/40 shadow-md shadow-blue-600/30">
-              <Store className="w-5 h-5 text-white drop-shadow-xs" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shrink-0">
+              <Store className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="font-extrabold text-sm sm:text-base text-white tracking-tight leading-none">
-                  {storeProfile.name || t.appName}
-                </h1>
-                <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-sky-300 border border-blue-500/30">
-                  {t.posVersion}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-medium hidden sm:block mt-0.5">
-                {storeProfile.tagline || t.appSubtitle}
-              </p>
-            </div>
+            <h1 className="font-bold text-sm sm:text-base text-white tracking-tight truncate max-w-[180px] sm:max-w-[260px] md:max-w-none">
+              {storeProfile.name || t.appName}
+            </h1>
           </div>
 
-          {/* Center Navigation Tabs (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
+          {/* 2. Center: Clean Navigation Tabs */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 shrink-0">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -161,16 +116,18 @@ export const Header = ({
                     sounds.playBeep();
                     setActiveTab(item.id);
                   }}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-950 font-extrabold hover:from-blue-500 hover:to-indigo-500'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                      ? 'bg-blue-600 text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                   {item.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isActive ? 'bg-indigo-950 text-sky-300 shadow-xs' : 'bg-slate-800 text-sky-300'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isActive ? 'bg-blue-950 text-blue-200' : 'bg-slate-800 text-slate-300'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
@@ -179,139 +136,91 @@ export const Header = ({
             })}
           </nav>
 
-          {/* Right Status & Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* 3. Right: Essential Minimal Controls */}
+          <div className="flex items-center gap-2 shrink-0">
             
-            {/* Today Revenue Pill (Owner Only) */}
-            {isOwner && (
-              <div className="hidden sm:flex flex-col items-end px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-right">
-                <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">{t.todayRevenue}</span>
-                <span className="text-xs sm:text-sm font-black text-sky-400 font-mono">
-                  {formatRupiah(todayRevenue)}
-                </span>
-              </div>
-            )}
-
-            {/* Cloud Database Sync Status Badge */}
+            {/* Minimalist Cloud & Network Status */}
             <div 
-              title="Firebase Firestore Cloud Database Connected"
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold border bg-sky-950/60 text-sky-300 border-sky-800/60"
+              title={isOnline ? "Firebase Cloud Sync: Aktif • Online" : "Mode Offline • Tersimpan di Perangkat"}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900/70 border border-slate-800 text-xs text-slate-300"
             >
-              <Cloud className="w-3 h-3 text-sky-400" />
-              <span className="hidden xl:inline">Cloud Sync</span>
-            </div>
-
-            {/* Offline Status Badge */}
-            <div 
-              title={isOnline ? t.onlineTooltip : t.offlineTooltip}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold border ${
-                isOnline
-                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60'
-                  : 'bg-amber-950/80 text-amber-300 border-amber-800/80'
-              }`}
-            >
+              <Cloud className="w-3.5 h-3.5 text-sky-400" />
               {isOnline ? (
-                <>
-                  <Wifi className="w-3 h-3 text-emerald-400" />
-                  <span className="hidden xl:inline">{t.onlineStatus}</span>
-                </>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               ) : (
-                <>
-                  <WifiOff className="w-3 h-3 text-amber-400 animate-pulse" />
-                  <span className="hidden xl:inline">{t.offlineStatus}</span>
-                </>
+                <WifiOff className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
               )}
             </div>
 
-            {/* Live Clock (Desktop) */}
-            <div className="hidden md:flex flex-col items-end text-right px-1">
-              <span className="text-xs font-bold text-slate-200 font-mono tracking-tight">{currentTime}</span>
-              <span className="text-[9px] text-slate-400">{currentDate}</span>
+            {/* Quick Action Icons Group */}
+            <div className="flex items-center bg-slate-900/70 rounded-lg border border-slate-800 p-0.5 gap-0.5">
+              {/* Language Switch */}
+              <button
+                id="header-language-toggle"
+                onClick={toggleLanguage}
+                title={`Language: ${language.toUpperCase()}`}
+                className="px-2 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                {language.toUpperCase()}
+              </button>
+
+              {/* Sound Toggle */}
+              <button
+                onClick={toggleSound}
+                title={soundActive ? t.soundOn : t.soundOff}
+                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                {soundActive ? <Volume2 className="w-3.5 h-3.5 text-sky-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+              </button>
+
+              {/* Settings (Owner only) */}
+              {isOwner && (
+                <button
+                  id="header-settings-btn"
+                  onClick={() => {
+                    sounds.playBeep();
+                    openSettings();
+                  }}
+                  title={t.settingsTooltip}
+                  className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Language Switcher Pill Button */}
-            <button
-              id="header-language-toggle"
-              onClick={toggleLanguage}
-              title={`Switch language: ${language === 'id' ? 'English' : 'Bahasa Indonesia'}`}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-xs"
-            >
-              <Languages className="w-3.5 h-3.5 text-sky-400" />
-              <span className="font-extrabold uppercase tracking-wide">
-                {language === 'id' ? 'ID' : 'EN'}
-              </span>
-            </button>
-
-            {/* Audio Toggle */}
-            <button
-              onClick={toggleSound}
-              title={soundActive ? t.soundOn : t.soundOff}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                soundActive 
-                  ? 'bg-slate-800 text-sky-400 border-slate-700 hover:bg-slate-700' 
-                  : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
-              }`}
-            >
-              {soundActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-
-            {/* Settings Button (Owner Only) */}
-            {isOwner && (
-              <button
-                id="header-settings-btn"
-                onClick={() => {
-                  sounds.playBeep();
-                  openSettings();
-                }}
-                title={t.settingsTooltip}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Logged in User Role Pill & Logout Button */}
-            <div className="flex items-center gap-1 pl-1 border-l border-slate-800">
+            {/* User Account & Logout */}
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-800">
               <div 
                 title={`${t.loggedInAs}: ${currentUser.name} (${currentUser.role})`}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs font-bold ${
-                  isOwner
-                    ? 'bg-blue-950/80 border-blue-800/80 text-sky-200'
-                    : 'bg-emerald-950/80 border-emerald-800/80 text-emerald-200'
-                }`}
+                className="flex items-center gap-1 text-xs text-slate-200"
               >
                 {isOwner ? (
                   <ShieldCheck className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 ) : (
                   <UserCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 )}
-                <span className="truncate max-w-[80px] sm:max-w-[120px]">
+                <span className="font-medium text-xs truncate max-w-[80px] lg:max-w-[110px]">
                   {currentUser.name}
-                </span>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded font-black tracking-wider uppercase ${
-                  isOwner ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs' : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
-                }`}>
-                  {currentUser.role === 'owner' ? t.userRoleBadgeOwner : t.userRoleBadgeStaff}
                 </span>
               </div>
 
-              {/* Logout button */}
               <button
                 id="header-logout-btn"
                 onClick={handleLogoutClick}
                 title={t.logoutBtn}
-                className="p-1.5 rounded-lg bg-red-950/70 hover:bg-red-900 border border-red-800/70 text-red-200 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
+                className="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">{t.logoutBtn}</span>
               </button>
             </div>
 
           </div>
+
         </div>
 
-        {/* Mobile Navigation Tabs */}
-        <div className="flex lg:hidden overflow-x-auto py-1.5 gap-1.5 border-t border-blue-950/80 scrollbar-none">
+        {/* Mobile Navigation Tabs (visible only on small screens) */}
+        <div className="flex md:hidden overflow-x-auto py-1.5 gap-1.5 border-t border-slate-800 scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -322,16 +231,16 @@ export const Header = ({
                   sounds.playBeep();
                   setActiveTab(item.id);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold shadow-md shadow-blue-950'
-                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white font-bold'
+                    : 'bg-slate-800/80 text-slate-300'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
                 {item.badge && (
-                  <span className={`text-[9px] px-1.5 rounded-full font-black ${isActive ? 'bg-indigo-950 text-sky-300' : 'bg-slate-900 text-sky-300'}`}>
+                  <span className="text-[9px] px-1.5 rounded-full font-bold bg-blue-950 text-blue-200">
                     {item.badge}
                   </span>
                 )}
@@ -339,19 +248,18 @@ export const Header = ({
             );
           })}
         </div>
-
       </div>
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-[#0B1528] border border-blue-900/70 text-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4">
+          <div className="bg-[#0B1528] border border-slate-800 text-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-red-600/20 border border-red-500/30 text-red-400 shrink-0">
                 <LogOut className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm sm:text-base text-white leading-tight">
+                <h3 className="font-bold text-sm sm:text-base text-white leading-tight">
                   {language === 'en' ? 'Sign Out Confirmation' : 'Konfirmasi Keluar (Logout)'}
                 </h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">
