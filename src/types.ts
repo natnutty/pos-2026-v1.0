@@ -74,7 +74,7 @@ export interface StoreProfile {
   cashierName: string;
 }
 
-export type ReportPeriod = 'today' | 'yesterday' | 'weekly' | 'monthly' | 'custom';
+export type ReportPeriod = 'today' | 'yesterday' | 'weekly' | 'monthly' | 'yearly' | 'custom';
 
 export type UserRole = 'owner' | 'staff';
 

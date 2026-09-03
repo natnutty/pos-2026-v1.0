@@ -15,7 +15,8 @@ import {
   ArrowUpRight,
   FileText,
   CheckCircle2,
-  Loader2
+  Loader2,
+  ChevronDown
 } from 'lucide-react';
 import { Transaction, StoreProfile, ReportPeriod } from '../types';
 import { formatRupiah, formatNumber, getCategoryLabel, formatDateIndonesian } from '../utils/formatters';
@@ -77,6 +78,15 @@ export const ReportsScreen = ({
       return {
         filteredTx: validTx.filter((tx) => tx.date >= thirtyDaysAgoStr && tx.date <= todayStr),
         periodLabel: t.periodMonthly,
+      };
+    }
+
+    if (period === 'yearly') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const startOfYearStr = startOfYear.toISOString().split('T')[0];
+      return {
+        filteredTx: validTx.filter((tx) => tx.date >= startOfYearStr && tx.date <= todayStr),
+        periodLabel: `${t.periodYearly} (${now.getFullYear()})`,
       };
     }
 
@@ -328,30 +338,29 @@ export const ReportsScreen = ({
           </p>
         </div>
 
-        {/* Period Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
-          {[
-            { id: 'today' as const, label: t.periodToday },
-            { id: 'yesterday' as const, label: t.periodYesterday },
-            { id: 'weekly' as const, label: t.periodWeekly },
-            { id: 'monthly' as const, label: t.periodMonthly },
-            { id: 'custom' as const, label: t.periodCustom },
-          ].map((p) => (
-            <button
-              key={p.id}
-              onClick={() => {
+        {/* Period Selector Dropdown Button */}
+        <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800 shadow-inner hover:border-slate-700 transition-colors">
+          <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+          <span className="text-xs font-bold text-slate-400 hidden sm:inline">Periode:</span>
+          <div className="relative flex items-center">
+            <select
+              id="period-dropdown-select"
+              value={period}
+              onChange={(e) => {
                 sounds.playBeep();
-                setPeriod(p.id);
+                setPeriod(e.target.value as ReportPeriod);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                period === p.id
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-950 font-extrabold'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className="bg-transparent text-xs sm:text-sm font-extrabold text-white focus:outline-none cursor-pointer pr-6 appearance-none [&>option]:bg-slate-900 [&>option]:text-white"
             >
-              {p.label}
-            </button>
-          ))}
+              <option value="today">{t.periodToday}</option>
+              <option value="yesterday">{t.periodYesterday}</option>
+              <option value="weekly">{t.periodWeekly}</option>
+              <option value="monthly">{t.periodMonthly}</option>
+              <option value="yearly">{t.periodYearly}</option>
+              <option value="custom">{t.periodCustom}</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none absolute right-0" />
+          </div>
         </div>
 
         {/* Action Buttons */}
