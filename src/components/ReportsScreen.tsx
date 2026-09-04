@@ -432,9 +432,17 @@ export const ReportsScreen = ({
       )}
 
       {/* Period Active Badge */}
-      <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-        <span className="font-semibold text-slate-300">{t.showingPeriod} <span className="text-sky-400">{periodLabel}</span></span>
-        <span>{filteredTx.length} {t.completedTxLogged}</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-200">{t.showingPeriod}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-400/50 shadow-xs">
+            {periodLabel}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>{filteredTx.length} {t.completedTxLogged}</span>
+        </div>
       </div>
 
       {/* KPI Cards Grid */}
